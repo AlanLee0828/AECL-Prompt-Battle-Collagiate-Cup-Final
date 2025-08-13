@@ -7,7 +7,6 @@ Battle 630 数据爬取和得分计算脚本
 
 import requests
 import json
-import pandas as pd
 from datetime import datetime
 import time
 
@@ -102,6 +101,8 @@ def process_battle_data(battle_data):
 
 def save_to_excel(data, filename=None):
     """保存数据到Excel文件"""
+    # 将 pandas 的导入延迟到实际需要导出时，避免在无服务器环境中引入沉重依赖
+    import pandas as pd
     if not filename:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"battle_630_results_{timestamp}.xlsx"
