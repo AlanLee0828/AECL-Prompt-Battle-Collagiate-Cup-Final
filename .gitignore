@@ -20,6 +20,14 @@ venv/
 .vscode/
 .history/
 .ipynb_checkpoints/
+.Spotlight-V100
+.Trashes
+.fseventsd
+.AppleDouble
+.LSOverride
+.apdisk
+# macOS resource fork files on external drives
+._*
 
 # Packaging/Build
 build/
