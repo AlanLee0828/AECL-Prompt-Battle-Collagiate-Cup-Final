@@ -18,7 +18,7 @@
 ```
 pb 积分/
 ├── scrape_battle_630.py          # Python爬虫脚本
-├── battle_630_dashboard.html     # 可视化网页界面
+├── battle_dashboard.html         # 可视化网页界面
 ├── requirements.txt              # Python依赖包列表
 ├── battle_630_analysis.md       # 技术分析文档
 ├── README.md                    # 项目说明文档
@@ -63,9 +63,9 @@ python scrape_battle_630.py
 
 ```bash
 # 在浏览器中打开
-open battle_630_dashboard.html  # macOS
+open battle_dashboard.html      # macOS
 # 或
-start battle_630_dashboard.html # Windows
+start battle_dashboard.html     # Windows
 # 或直接双击HTML文件
 ```
 
@@ -155,7 +155,7 @@ start battle_630_dashboard.html # Windows
 
 2) 前端（GitHub Pages）
 - 在仓库 Settings → Pages 启用 Pages，Source 选择 `main` 分支 `/` 根目录
-- 配置 `battle_630_dashboard.html` 的 API 地址：
+- 配置 `battle_dashboard.html` 的 API 地址：
   - 临时：在浏览器控制台执行 `window.API_BASE = 'https://your-service.onrender.com'` 后刷新
   - 永久：在 HTML `<head>` 的脚本中把 `window.API_BASE` 赋值为你的后端地址
 
