@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "api/battle.py", "use": "@vercel/python" },
+    { "src": "*.html", "use": "@vercel/static" },
+    { "src": "index.html", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/battle", "dest": "/api/battle.py" },
+    { "src": "/", "dest": "/index.html" }
+  ]
+}
+
+
