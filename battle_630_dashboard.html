@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle 投票统计仪表板</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: radial-gradient(1200px 800px at 20% 0%, #0f2a1f 0%, #0b1410 50%, #070b08 100%); min-height: 100vh; padding: 20px; color: #d6fbe1; }
+        .container { max-width: 1400px; margin: 0 auto; background: rgba(10, 16, 14, 0.8); border: 1px solid rgba(42, 255, 149, 0.15); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.5), 0 0 40px rgba(42,255,149,0.06) inset; overflow: hidden; backdrop-filter: blur(4px); }
+        .header { background: linear-gradient(135deg, rgba(6,12,10,.9) 0%, rgba(10,20,16,.9) 100%); color: #2aff95; padding: 26px 30px; text-align: center; border-bottom: 1px solid rgba(42,255,149,0.2); }
+        .header h1 { font-size: 2.1em; font-weight: 600; letter-spacing: 0.5px; text-shadow: 0 0 8px rgba(42,255,149,0.4); margin-bottom: 6px; }
+        .header p { color: #9be7c5; opacity: .95; }
+        .controls { padding: 14px 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: rgba(8, 14, 12, 0.9); border-bottom: 1px solid rgba(42,255,149,0.12); }
+        .controls .grow { flex: 1 1 420px; display: flex; gap: 10px; }
+        input[type="text"] { flex: 1; padding: 10px 14px; background: #0b1411; color: #d6fbe1; border: 1px solid rgba(42,255,149,0.25); border-radius: 10px; font-size: 14px; outline: none; box-shadow: 0 0 0 2px transparent; transition: box-shadow .2s; }
+        input[type="text"]:focus { box-shadow: 0 0 0 2px rgba(42,255,149,0.25); }
+        .btn { padding: 10px 16px; border: 1px solid rgba(42,255,149,0.35); border-radius: 10px; font-size: 12px; cursor: pointer; transition: .2s; color: #c9f6df; background: linear-gradient(180deg, rgba(9,18,14,0.9), rgba(12,22,18,0.9)); box-shadow: 0 0 0 0 rgba(42,255,149,0); }
+        .btn:hover { border-color: rgba(42,255,149,0.6); box-shadow: 0 0 12px rgba(42,255,149,0.15); }
+        .btn-primary { color: #0c1a14; background: linear-gradient(180deg, #2aff95, #17e07a); border-color: rgba(42,255,149,0.85); }
+        .btn-primary:hover { filter: brightness(1.05); box-shadow: 0 6px 18px rgba(42,255,149,0.25); }
+        .btn-success { color: #0c1a14; background: linear-gradient(180deg, #19d27a, #10b866); border-color: rgba(42,255,149,0.85); }
+        .btn-secondary { background: linear-gradient(180deg, rgba(12,22,18,0.95), rgba(10,18,15,0.95)); color: #a7eecf; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 16px; padding: 18px 24px; background: rgba(6,11,9,0.85); border-bottom: 1px solid rgba(42,255,149,0.12); }
+        .stat-card { background: linear-gradient(180deg, rgba(9,18,14,0.95), rgba(12,22,18,0.95)); padding: 18px; border-radius: 12px; text-align: center; border: 1px solid rgba(42,255,149,0.18); box-shadow: 0 8px 20px rgba(0,0,0,.35); }
+        .stat-number { font-size: 2.0em; font-weight: 800; color: #2aff95; margin-bottom: 6px; text-shadow: 0 0 10px rgba(42,255,149,0.25); }
+        .stat-label { color: #9be7c5; font-size: .85em; letter-spacing: 1.2px; text-transform: uppercase; }
+        .table-container { padding: 20px 24px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; background: rgba(7, 12, 10, 0.9); border-radius: 12px; overflow: hidden; box-shadow: 0 12px 26px rgba(0,0,0,.45); border: 1px solid rgba(42,255,149,0.15); }
+        th { background: linear-gradient(180deg, rgba(9,18,14,0.95), rgba(12,22,18,0.95)); color: #9ef7d1; padding: 12px; text-align: left; position: sticky; top: 0; border-bottom: 1px solid rgba(42,255,149,0.15); }
+        td { padding: 12px; border-bottom: 1px solid rgba(42,255,149,0.08); color: #d6fbe1; }
+        tr:hover td { background: rgba(16, 30, 24, 0.65); }
+        .rank-1 { background: linear-gradient(135deg, rgba(42,255,149,0.18), rgba(42,255,149,0.10)); box-shadow: inset 0 0 0 1px rgba(42,255,149,0.18); }
+        .rank-2 { background: linear-gradient(135deg, rgba(42,255,149,0.12), rgba(42,255,149,0.06)); box-shadow: inset 0 0 0 1px rgba(42,255,149,0.12); }
+        .rank-3 { background: linear-gradient(135deg, rgba(42,255,149,0.10), rgba(42,255,149,0.05)); box-shadow: inset 0 0 0 1px rgba(42,255,149,0.10); }
+        .rank-1 td, .rank-2 td, .rank-3 td { color: #e8fff3; }
+        .winner { font-size: 1.2em; text-align: center; text-shadow: 0 0 8px rgba(42,255,149,0.35); }
+        .score { font-weight: 700; color: #2aff95; }
+        .votes { font-weight: 700; color: #8ef9c2; }
+        .error { background: #e74c3c; color: #fff; padding: 12px; border-radius: 10px; margin: 12px 24px; text-align: center; }
+        .loading { text-align: center; padding: 30px; color: #9be7c5; }
+        /* Creation link column adjustments */
+        th:last-child, td:last-child { width: 128px; }
+        .creation-url { text-align: center; }
+        .creation-url .btn { font-size: 11px; padding: 6px 10px; border-radius: 8px; white-space: nowrap; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 PromptBattle 投票统计仪表板</h1>
+            <p>输入 PromptBattle 链接或 fightId，实时抓取票数并计算积分</p>
+        </div>
+        <div class="controls">
+            <div class="grow">
+                <input id="inputUrl" type="text" placeholder="例如：@https://www.battleverse.cn/battle/630 或 630">
+                <button class="btn btn-primary" onclick="fetchFromServer()">抓取</button>
+                <button class="btn btn-secondary" onclick="loadLocalJSON()">从本地JSON加载</button>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <input id="searchInput" type="text" placeholder="搜索用户名/作品ID/投票者">
+                <button class="btn btn-primary" onclick="filterTable()">搜索</button>
+                <button class="btn btn-secondary" onclick="clearFilter()">清除</button>
+                <button class="btn btn-success" onclick="downloadExcel()">📥 下载CSV</button>
+                <button class="btn btn-primary" onclick="downloadJSON()">📦 下载JSON</button>
+            </div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-number" id="totalCreations">-</div><div class="stat-label">总作品数</div></div>
+            <div class="stat-card"><div class="stat-number" id="totalVotes">-</div><div class="stat-label">总票数</div></div>
+            <div class="stat-card"><div class="stat-number" id="winnerCount">-</div><div class="stat-label">冠军数</div></div>
+            <div class="stat-card"><div class="stat-number" id="participants">-</div><div class="stat-label">参与用户数</div></div>
+        </div>
+        <div class="table-container">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                                            <th>排名</th>
+                    <th>作品ID</th>
+                    <th>用户名</th>
+                    <th>票数</th>
+                    <th>加分</th>
+                    <th>得分</th>
+                    <th>冠军</th>
+                    <th>投票者</th>
+                        <th>创建时间</th>
+                        <th>作品链接</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"><tr><td colspan="10" class="loading">请输入链接或ID并点击抓取</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+<script>
+let battleData = null;
+let filteredData = null;
+let currentPage = 1;
+const itemsPerPage = 1000; // 作品不多，默认不分页
+
+function updateStats() {
+    if (!battleData) return;
+    document.getElementById('totalCreations').textContent = battleData.total_creations;
+    document.getElementById('totalVotes').textContent = battleData.total_votes;
+    // 移除“每票得分”，改为显示冠军数量
+    const winEl = document.getElementById('winnerCount');
+    if (winEl) winEl.textContent = battleData.winner_count ?? (battleData.results?.filter(r=>r.是否冠军==='是').length || 0);
+    document.getElementById('participants').textContent = battleData.battle_info?.参与用户数 ?? '-';
+}
+
+function renderTable() {
+    if (!filteredData) return;
+    const tbody = document.getElementById('tableBody');
+    let html = '';
+    filteredData.forEach((item, index) => {
+        const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
+        const isWinner = item.是否冠军 === '是';
+        const winnerDisplay = isWinner ? '👑' : '';
+        html += `
+        <tr class="${rankClass}">
+            <td><strong>${index + 1}</strong></td>
+            <td>${item.作品ID}</td>
+            <td><strong>${item.用户名}</strong></td>
+            <td class="votes">${item.票数}</td>
+            <td class="bonus">${item.加分 ?? 0}</td>
+            <td class="score">${item.得分}</td>
+            <td class="winner">${winnerDisplay}</td>
+            <td>${(item.投票者 || []).join(', ') || '无'}</td>
+            <td>${formatDateTime(item.创建时间)}</td>
+            <td>${item.作品链接 ? `<a href="${item.作品链接}" target="_blank" class="btn btn-primary">查看作品</a>` : '无'}</td>
+        </tr>`
+    });
+    tbody.innerHTML = html || '<tr><td colspan="10" class="loading">无数据</td></tr>';
+}
+
+function formatDateTime(s){ if(!s) return '未知'; const d = new Date(s); return isNaN(d) ? s : d.toLocaleString('zh-CN'); }
+
+function compareByVotesDesc(a, b){
+    const av = Number(a.票数 ?? (Array.isArray(a.投票者) ? a.投票者.length : 0));
+    const bv = Number(b.票数 ?? (Array.isArray(b.投票者) ? b.投票者.length : 0));
+    if (bv !== av) return bv - av;
+    const as = Number(a.得分 ?? 0);
+    const bs = Number(b.得分 ?? 0);
+    return bs - as;
+}
+
+async function fetchFromServer(){
+    const input = document.getElementById('inputUrl').value.trim();
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '<tr><td colspan="10" class="loading">正在抓取，请稍候...</td></tr>';
+    try{
+        const res = await fetch('http://127.0.0.1:5000/api/battle', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ url: input }) });
+        const data = await res.json();
+        if(!data.success){ throw new Error(data.message || '抓取失败'); }
+        battleData = data.data;
+        // 抓取后重置搜索并在前端再次按票数降序排序
+        document.getElementById('searchInput').value = '';
+        filteredData = [...battleData.results].sort(compareByVotesDesc);
+        updateStats();
+        renderTable();
+    }catch(err){
+        console.error(err);
+        tbody.innerHTML = `<tr><td colspan="10" class="error">抓取失败：${err.message}</td></tr>`;
+    }
+}
+
+async function loadLocalJSON(){
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '<tr><td colspan="10" class="loading">正在从本地加载...</td></tr>';
+    try{
+        const res = await fetch('battle_630_data_20250809_231400.json');
+        const data = await res.json();
+        battleData = data;
+        document.getElementById('searchInput').value = '';
+        filteredData = [...battleData.results].sort(compareByVotesDesc);
+        updateStats();
+        renderTable();
+    }catch(err){
+        tbody.innerHTML = `<tr><td colspan="10" class="error">本地JSON加载失败：${err.message}</td></tr>`;
+    }
+}
+
+function filterTable(){
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    if(!q){
+        filteredData = [...(battleData?.results||[])].sort(compareByVotesDesc);
+        renderTable();
+        return;
+    }
+    filteredData = (battleData?.results||[]).filter(item =>
+        String(item.用户名).toLowerCase().includes(q) ||
+        String(item.作品ID).includes(q) ||
+        (item.投票者||[]).some(v => String(v).toLowerCase().includes(q))
+    ).sort(compareByVotesDesc);
+    renderTable();
+}
+
+function clearFilter(){ document.getElementById('searchInput').value=''; filteredData = [...(battleData?.results||[])].sort(compareByVotesDesc); renderTable(); }
+
+function downloadExcel(){
+    if(!filteredData){ alert('无可导出的数据'); return; }
+    let csv = '排名,作品ID,用户名,票数,加分,得分,投票者,创建时间\n';
+    filteredData.forEach((item, i)=>{
+        const row = [i+1, item.作品ID, item.用户名, item.票数, (item.加分 ?? 0), item.得分, (item.投票者||[]).join(';'), item.创建时间].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
+        csv += row + '\n';
+    });
+    downloadFile(csv, 'battle_results.csv', 'text/csv');
+}
+
+function downloadJSON(){
+    if(!battleData){ alert('无可导出的数据'); return; }
+    downloadFile(JSON.stringify(battleData, null, 2), 'battle_data.json', 'application/json');
+}
+
+function downloadFile(content, filename, mime){
+    const blob = new Blob([content], {type: mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+</script>
+</body>
+</html> 

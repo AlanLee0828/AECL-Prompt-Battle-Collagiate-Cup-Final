@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Environments
+venv/
+.env
+.env.*
+
+# Editors/OS
+.DS_Store
+.idea/
+.vscode/
+.history/
+.ipynb_checkpoints/
+
+# Packaging/Build
+build/
+dist/
+*.egg-info/
+
+# Caches/Logs
+.cache/
+*.log
+
+# Project-specific generated data/outputs
+battle_630_data_*.json
+battle_630_results_*.xlsx
+
+
