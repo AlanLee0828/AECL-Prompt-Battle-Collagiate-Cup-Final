@@ -11,6 +11,9 @@ from scrape_battle_630 import fetch_battle_data, process_battle_data
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
+@app.route('/', methods=['GET'])
+def health_check():
+    return jsonify({"ok": True}), 200
 
 BATTLE_URL_REGEX = re.compile(r"https?://(?:www\.)?battleverse\.cn/battle/(\d+)")
 
@@ -60,4 +63,4 @@ def api_battle():
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=5000, debug=False)

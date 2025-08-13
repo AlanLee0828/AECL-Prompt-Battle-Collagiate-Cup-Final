@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Battle 投票统计仪表板</title>
+    <script>
+      window.API_BASE = window.API_BASE || (location.hostname === 'localhost' || location.hostname === '127.0.0.1' ? 'http://127.0.0.1:5000' : (window.API_BASE || ''));
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: radial-gradient(1200px 800px at 20% 0%, #0f2a1f 0%, #0b1410 50%, #070b08 100%); min-height: 100vh; padding: 20px; color: #d6fbe1; }
@@ -149,7 +152,8 @@ async function fetchFromServer(){
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = '<tr><td colspan="10" class="loading">正在抓取，请稍候...</td></tr>';
     try{
-        const res = await fetch('http://127.0.0.1:5000/api/battle', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ url: input }) });
+        const base = (window.API_BASE || '').replace(/\/$/, '');
+        const res = await fetch(base + '/api/battle', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ url: input }) });
         const data = await res.json();
         if(!data.success){ throw new Error(data.message || '抓取失败'); }
         battleData = data.data;

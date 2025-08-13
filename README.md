@@ -141,3 +141,29 @@ start battle_630_dashboard.html # Windows
 ## 许可证
 
 本项目仅供学习和研究使用，请遵守相关网站的使用条款和API规范。 
+
+## 部署（最简单路线）
+
+推荐：GitHub Pages（前端）+ Render（后端）
+
+1) 后端（Render）
+- 登录 Render，New → Web Service，连接本仓库
+- Root Directory: 仓库根目录
+- Build Command: `pip install -r requirements.txt`
+- Start Command: `gunicorn -w 2 -b 0.0.0.0:5000 server:app`
+- 端口：5000（Render 自动映射），部署完成后获得后端 URL，如 `https://your-service.onrender.com`
+
+2) 前端（GitHub Pages）
+- 在仓库 Settings → Pages 启用 Pages，Source 选择 `main` 分支 `/` 根目录
+- 配置 `battle_630_dashboard.html` 的 API 地址：
+  - 临时：在浏览器控制台执行 `window.API_BASE = 'https://your-service.onrender.com'` 后刷新
+  - 永久：在 HTML `<head>` 的脚本中把 `window.API_BASE` 赋值为你的后端地址
+
+3) 使用
+- 打开 GitHub Pages 地址，输入链接或 fightId，点击“抓取”
+
+可选：本地开发
+```
+pip install -r requirements.txt
+python server.py
+```
