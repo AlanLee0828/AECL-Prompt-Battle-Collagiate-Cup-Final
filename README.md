@@ -150,7 +150,7 @@ start battle_630_dashboard.html # Windows
 - 登录 Render，New → Web Service，连接本仓库
 - Root Directory: 仓库根目录
 - Build Command: `pip install -r requirements.txt`
-- Start Command: `gunicorn -w 2 -b 0.0.0.0:5000 server:app`
+- Start Command: `gunicorn -w 2 -b 0.0.0.0:$PORT server:app`（Render 会注入 `$PORT`）
 - 端口：5000（Render 自动映射），部署完成后获得后端 URL，如 `https://your-service.onrender.com`
 
 2) 前端（GitHub Pages）
