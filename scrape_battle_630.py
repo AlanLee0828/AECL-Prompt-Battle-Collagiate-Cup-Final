@@ -67,14 +67,13 @@ def process_battle_data(battle_data):
             '是否冠军': '是' if is_winner else '否'
         })
     
-    # 按票数排序
-    results.sort(key=lambda x: x['票数'], reverse=True)
+    # 先计算得分，然后按得分排序
     
-    # 定义特殊投票者列表
-    special_voters = ["K'K", "AJ", "麦橘MERJIC"]
+    # 定义特邀评委列表
+    special_judges = ["K'K", "AJ", "麦橘MERJIC"]
     
     # 计算得分（最高票数得100分，其他按比例计算），并在满足"冠军 且 票数>15"时额外+30分
-    # 同时检查是否有特殊投票者，如有则额外+30分
+    # 同时检查是否有特邀评委，如有则额外+30分
     if results and results[0]['票数'] > 0:
         max_votes = results[0]['票数']  # 最高票数
         for result in results:
@@ -85,25 +84,38 @@ def process_battle_data(battle_data):
             # 冠军加分
             champion_bonus = 30 if (result.get('是否冠军') == '是' and result.get('票数', 0) > 15) else 0
             
-            # 特殊投票者加分（可叠加）
-            special_voter_bonus = 0
-            special_voter_names = []
+            # 特邀评委加分（分别计算每个评委）
+            kk_bonus = 0
+            aj_bonus = 0
+            merjic_bonus = 0
             voters = result.get('投票者', [])
             for voter in voters:
-                if voter in special_voters:
-                    special_voter_bonus += 30
-                    special_voter_names.append(voter)
+                if voter == "K'K":
+                    kk_bonus = 30
+                elif voter == "AJ":
+                    aj_bonus = 30
+                elif voter == "麦橘MERJIC":
+                    merjic_bonus = 30
+            
+            total_judge_bonus = kk_bonus + aj_bonus + merjic_bonus
             
             result['加分'] = champion_bonus
-            result['特殊投票者加分'] = special_voter_bonus
-            result['特殊投票者'] = ', '.join(special_voter_names) if special_voter_names else ''
-            result['得分'] = round(base_score + champion_bonus + special_voter_bonus, 2)
+            result["K'K加分"] = kk_bonus
+            result['AJ加分'] = aj_bonus
+            result['麦橘MERJIC加分'] = merjic_bonus
+            result['特邀评委总分'] = total_judge_bonus
+            result['得分'] = round(base_score + champion_bonus + total_judge_bonus, 2)
     else:
         for result in results:
             result['加分'] = 0
-            result['特殊投票者加分'] = 0
-            result['特殊投票者'] = ""
+            result["K'K加分"] = 0
+            result['AJ加分'] = 0
+            result['麦橘MERJIC加分'] = 0
+            result['特邀评委总分'] = 0
             result['得分'] = 0
+    
+    # 按最终得分排序
+    results.sort(key=lambda x: x['得分'], reverse=True)
     
     return {
         'results': results,
@@ -135,8 +147,10 @@ def save_to_excel(data, filename=None):
             '用户名': result['用户名'],
             '票数': result['票数'],
             '加分': result.get('加分', 0),
-            '特殊投票者加分': result.get('特殊投票者加分', 0),
-            '特殊投票者': result.get('特殊投票者', ''),
+            "K'K加分": result.get("K'K加分", 0),
+            'AJ加分': result.get('AJ加分', 0),
+            '麦橘MERJIC加分': result.get('麦橘MERJIC加分', 0),
+            '特邀评委总分': result.get('特邀评委总分', 0),
             '得分': result['得分'],
             '投票者': ', '.join(result['投票者']) if result['投票者'] else '无',
             '创建时间': result['创建时间'],

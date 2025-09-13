@@ -85,16 +85,17 @@
                         <th>用户名</th>
                         <th>票数</th>
                         <th>加分</th>
-                        <th>特殊投票者加分</th>
-                        <th>特殊投票者</th>
+                        <th>K'K加分</th>
+                        <th>AJ加分</th>
+                        <th>麦橘MERJIC加分</th>
+                        <th>特邀评委总分</th>
                         <th>得分</th>
-                        <th>冠军</th>
                         <th>投票者</th>
                         <th>创建时间</th>
                         <th>作品链接</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody"><tr><td colspan="12" class="loading">请输入链接或ID并点击抓取</td></tr></tbody>
+                <tbody id="tableBody"><tr><td colspan="13" class="loading">请输入链接或ID并点击抓取</td></tr></tbody>
             </table>
         </div>
     </div>
@@ -130,16 +131,17 @@ function renderTable() {
             <td><strong>${item.用户名}</strong></td>
             <td class="votes">${item.票数}</td>
             <td class="bonus">${item.加分 ?? 0}</td>
-            <td class="bonus">${item.特殊投票者加分 ?? 0}</td>
-            <td>${item.特殊投票者 || ''}</td>
+            <td class="bonus">${item["K'K加分"] ?? 0}</td>
+            <td class="bonus">${item.AJ加分 ?? 0}</td>
+            <td class="bonus">${item.麦橘MERJIC加分 ?? 0}</td>
+            <td class="bonus">${item.特邀评委总分 ?? 0}</td>
             <td class="score">${item.得分}</td>
-            <td class="winner">${winnerDisplay}</td>
             <td>${(item.投票者 || []).join(', ') || '无'}</td>
             <td>${formatDateTime(item.创建时间)}</td>
             <td>${item.作品链接 ? `<a href="${item.作品链接}" target="_blank" class="btn btn-primary">查看作品</a>` : '无'}</td>
         </tr>`
     });
-    tbody.innerHTML = html || '<tr><td colspan="12" class="loading">无数据</td></tr>';
+    tbody.innerHTML = html || '<tr><td colspan="13" class="loading">无数据</td></tr>';
 }
 
 function formatDateTime(s){ if(!s) return '未知'; const d = new Date(s); return isNaN(d) ? s : d.toLocaleString('zh-CN'); }
@@ -156,7 +158,7 @@ function compareByVotesDesc(a, b){
 async function fetchFromServer(){
     const input = document.getElementById('inputUrl').value.trim();
     const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '<tr><td colspan="12" class="loading">正在抓取，请稍候...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="13" class="loading">正在抓取，请稍候...</td></tr>';
     try{
         const base = (window.API_BASE || '').replace(/\/$/, '');
         const url = (base ? base + '/api/battle' : '/api/battle');
@@ -171,13 +173,13 @@ async function fetchFromServer(){
         renderTable();
     }catch(err){
         console.error(err);
-        tbody.innerHTML = `<tr><td colspan="12" class="error">抓取失败：${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="13" class="error">抓取失败：${err.message}</td></tr>`;
     }
 }
 
 async function loadLocalJSON(){
     const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '<tr><td colspan="12" class="loading">正在从本地加载...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="13" class="loading">正在从本地加载...</td></tr>';
     try{
         const res = await fetch('battle_630_data_20250809_231400.json');
         const data = await res.json();
@@ -187,7 +189,7 @@ async function loadLocalJSON(){
         updateStats();
         renderTable();
     }catch(err){
-        tbody.innerHTML = `<tr><td colspan="12" class="error">本地JSON加载失败：${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="13" class="error">本地JSON加载失败：${err.message}</td></tr>`;
     }
 }
 
@@ -210,9 +212,9 @@ function clearFilter(){ document.getElementById('searchInput').value=''; filtere
 
 function downloadExcel(){
     if(!filteredData){ alert('无可导出的数据'); return; }
-    let csv = '排名,作品ID,用户名,票数,加分,特殊投票者加分,特殊投票者,得分,投票者,创建时间\n';
+    let csv = '排名,作品ID,用户名,票数,加分,K\'K加分,AJ加分,麦橘MERJIC加分,特邀评委总分,得分,投票者,创建时间\n';
     filteredData.forEach((item, i)=>{
-        const row = [i+1, item.作品ID, item.用户名, item.票数, (item.加分 ?? 0), (item.特殊投票者加分 ?? 0), (item.特殊投票者 || ''), item.得分, (item.投票者||[]).join(';'), item.创建时间].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
+        const row = [i+1, item.作品ID, item.用户名, item.票数, (item.加分 ?? 0), (item["K'K加分"] ?? 0), (item.AJ加分 ?? 0), (item.麦橘MERJIC加分 ?? 0), (item.特邀评委总分 ?? 0), item.得分, (item.投票者||[]).join(';'), item.创建时间].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
         csv += row + '\n';
     });
     downloadFile(csv, 'battle_results.csv', 'text/csv');
