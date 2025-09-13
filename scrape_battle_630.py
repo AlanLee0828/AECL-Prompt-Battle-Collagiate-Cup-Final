@@ -70,19 +70,40 @@ def process_battle_data(battle_data):
     # 按票数排序
     results.sort(key=lambda x: x['票数'], reverse=True)
     
-    # 计算得分（最高票数得100分，其他按比例计算），并在满足“冠军 且 票数>15”时额外+30分
+    # 定义特殊投票者列表
+    special_voters = ["K'K", "AJ", "麦橘MERJIC"]
+    
+    # 计算得分（最高票数得100分，其他按比例计算），并在满足"冠军 且 票数>15"时额外+30分
+    # 同时检查是否有特殊投票者，如有则额外+30分
     if results and results[0]['票数'] > 0:
         max_votes = results[0]['票数']  # 最高票数
         for result in results:
             base_score = 0
             if result['票数'] > 0:
                 base_score = (result['票数'] / max_votes) * 100
-            bonus = 30 if (result.get('是否冠军') == '是' and result.get('票数', 0) > 15) else 0
-            result['加分'] = bonus
-            result['得分'] = round(base_score + bonus, 2)
+            
+            # 冠军加分
+            champion_bonus = 30 if (result.get('是否冠军') == '是' and result.get('票数', 0) > 15) else 0
+            
+            # 特殊投票者加分
+            special_voter_bonus = 0
+            special_voter_name = ""
+            voters = result.get('投票者', [])
+            for voter in voters:
+                if voter in special_voters:
+                    special_voter_bonus = 30
+                    special_voter_name = voter
+                    break
+            
+            result['加分'] = champion_bonus
+            result['特殊投票者加分'] = special_voter_bonus
+            result['特殊投票者'] = special_voter_name
+            result['得分'] = round(base_score + champion_bonus + special_voter_bonus, 2)
     else:
         for result in results:
             result['加分'] = 0
+            result['特殊投票者加分'] = 0
+            result['特殊投票者'] = ""
             result['得分'] = 0
     
     return {
@@ -114,6 +135,9 @@ def save_to_excel(data, filename=None):
             '作品ID': result['作品ID'],
             '用户名': result['用户名'],
             '票数': result['票数'],
+            '加分': result.get('加分', 0),
+            '特殊投票者加分': result.get('特殊投票者加分', 0),
+            '特殊投票者': result.get('特殊投票者', ''),
             '得分': result['得分'],
             '投票者': ', '.join(result['投票者']) if result['投票者'] else '无',
             '创建时间': result['创建时间'],
