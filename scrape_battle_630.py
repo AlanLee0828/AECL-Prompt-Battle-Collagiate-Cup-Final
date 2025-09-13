@@ -85,19 +85,18 @@ def process_battle_data(battle_data):
             # 冠军加分
             champion_bonus = 30 if (result.get('是否冠军') == '是' and result.get('票数', 0) > 15) else 0
             
-            # 特殊投票者加分
+            # 特殊投票者加分（可叠加）
             special_voter_bonus = 0
-            special_voter_name = ""
+            special_voter_names = []
             voters = result.get('投票者', [])
             for voter in voters:
                 if voter in special_voters:
-                    special_voter_bonus = 30
-                    special_voter_name = voter
-                    break
+                    special_voter_bonus += 30
+                    special_voter_names.append(voter)
             
             result['加分'] = champion_bonus
             result['特殊投票者加分'] = special_voter_bonus
-            result['特殊投票者'] = special_voter_name
+            result['特殊投票者'] = ', '.join(special_voter_names) if special_voter_names else ''
             result['得分'] = round(base_score + champion_bonus + special_voter_bonus, 2)
     else:
         for result in results:
