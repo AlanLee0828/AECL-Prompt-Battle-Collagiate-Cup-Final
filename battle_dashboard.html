@@ -146,13 +146,14 @@ function renderTable() {
 
 function formatDateTime(s){ if(!s) return '未知'; const d = new Date(s); return isNaN(d) ? s : d.toLocaleString('zh-CN'); }
 
-function compareByVotesDesc(a, b){
-    const av = Number(a.票数 ?? (Array.isArray(a.投票者) ? a.投票者.length : 0));
-    const bv = Number(b.票数 ?? (Array.isArray(b.投票者) ? b.投票者.length : 0));
-    if (bv !== av) return bv - av;
+function compareByScoreDesc(a, b){
     const as = Number(a.得分 ?? 0);
     const bs = Number(b.得分 ?? 0);
-    return bs - as;
+    if (bs !== as) return bs - as;
+    // 如果得分相同，按票数排序
+    const av = Number(a.票数 ?? (Array.isArray(a.投票者) ? a.投票者.length : 0));
+    const bv = Number(b.票数 ?? (Array.isArray(b.投票者) ? b.投票者.length : 0));
+    return bv - av;
 }
 
 async function fetchFromServer(){
@@ -166,9 +167,9 @@ async function fetchFromServer(){
         const data = await res.json();
         if(!data.success){ throw new Error(data.message || '抓取失败'); }
         battleData = data.data;
-        // 抓取后重置搜索并在前端再次按票数降序排序
+        // 抓取后重置搜索并在前端再次按得分降序排序
         document.getElementById('searchInput').value = '';
-        filteredData = [...battleData.results].sort(compareByVotesDesc);
+        filteredData = [...battleData.results].sort(compareByScoreDesc);
         updateStats();
         renderTable();
     }catch(err){
@@ -185,7 +186,7 @@ async function loadLocalJSON(){
         const data = await res.json();
         battleData = data;
         document.getElementById('searchInput').value = '';
-        filteredData = [...battleData.results].sort(compareByVotesDesc);
+        filteredData = [...battleData.results].sort(compareByScoreDesc);
         updateStats();
         renderTable();
     }catch(err){
@@ -196,7 +197,7 @@ async function loadLocalJSON(){
 function filterTable(){
     const q = document.getElementById('searchInput').value.toLowerCase();
     if(!q){
-        filteredData = [...(battleData?.results||[])].sort(compareByVotesDesc);
+        filteredData = [...(battleData?.results||[])].sort(compareByScoreDesc);
         renderTable();
         return;
     }
@@ -204,11 +205,11 @@ function filterTable(){
         String(item.用户名).toLowerCase().includes(q) ||
         String(item.作品ID).includes(q) ||
         (item.投票者||[]).some(v => String(v).toLowerCase().includes(q))
-    ).sort(compareByVotesDesc);
+    ).sort(compareByScoreDesc);
     renderTable();
 }
 
-function clearFilter(){ document.getElementById('searchInput').value=''; filteredData = [...(battleData?.results||[])].sort(compareByVotesDesc); renderTable(); }
+function clearFilter(){ document.getElementById('searchInput').value=''; filteredData = [...(battleData?.results||[])].sort(compareByScoreDesc); renderTable(); }
 
 function downloadExcel(){
     if(!filteredData){ alert('无可导出的数据'); return; }
