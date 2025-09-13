@@ -74,8 +74,9 @@ def process_battle_data(battle_data):
     
     # 计算得分（最高票数得100分，其他按比例计算），并在满足"冠军 且 票数>15"时额外+30分
     # 同时检查是否有特邀评委，如有则额外+30分
-    if results and results[0]['票数'] > 0:
-        max_votes = results[0]['票数']  # 最高票数
+    if results:
+        # 先找到最高票数
+        max_votes = max(result['票数'] for result in results) if results else 0
         for result in results:
             base_score = 0
             if result['票数'] > 0:
