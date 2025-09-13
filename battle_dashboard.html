@@ -182,7 +182,7 @@ async function loadLocalJSON(){
     const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '<tr><td colspan="13" class="loading">正在从本地加载...</td></tr>';
     try{
-        const res = await fetch('battle_630_data_20250809_231400.json');
+        const res = await fetch('test_data.json');
         const data = await res.json();
         battleData = data;
         document.getElementById('searchInput').value = '';
